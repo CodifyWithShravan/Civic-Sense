@@ -1,98 +1,75 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useAuth } from '@/context/AuthContext';
+import { useTickets } from '@/context/TicketContext';
+import LoginScreen from '@/components/screens/LoginScreen';
+import RegisterScreen from '@/components/screens/RegisterScreen';
+import DashboardScreen from '@/components/screens/DashboardScreen';
+import AgentSwarmScreen from '@/components/screens/AgentSwarmScreen';
+import ProfileScreen from '@/components/screens/ProfileScreen';
+import ReportScannerModal from '@/components/screens/ReportScannerModal';
+import TicketDetailModal from '@/components/screens/TicketDetailModal';
+import MapViewModal from '@/components/screens/MapViewModal';
+import CivicBottomNav, { CivicTab } from '@/components/CivicBottomNav';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function AppMain() {
+  const { currentScreen, isAuthenticated } = useAuth();
+  const { setIsScannerOpen } = useTickets();
+  const [activeTab, setActiveTab] = useState<CivicTab>('dashboard');
+  const [isMapOpen, setIsMapOpen] = useState(false);
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+  // 1. If user is in Login view (Layout 1)
+  if (!isAuthenticated || currentScreen === 'login') {
+    return <LoginScreen />;
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
+
+  // 2. If user is in Register view (Layout 2)
+  if (currentScreen === 'register') {
+    return <RegisterScreen />;
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
+  // 3. Tab switching handler
+  const handleSelectTab = (tab: CivicTab) => {
+    if (tab === 'report') {
+      setIsScannerOpen(true);
+    } else {
+      setActiveTab(tab);
+    }
+  };
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.appContainer}>
+      {/* Active Tab Screen */}
+      <View style={styles.screenArea}>
+        {activeTab === 'dashboard' && (
+          <DashboardScreen onOpenMap={() => setIsMapOpen(true)} />
+        )}
+        {activeTab === 'swarm' && <AgentSwarmScreen />}
+        {activeTab === 'profile' && <ProfileScreen />}
+      </View>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      {/* Persistent Bottom Navigation (Layout 3) */}
+      <CivicBottomNav activeTab={activeTab} onSelectTab={handleSelectTab} />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      {/* Screen 1 Ingestion Modal: Camera Scanner & AI Vision */}
+      <ReportScannerModal />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+      {/* Screen 3 & 4 Modal: Live Audit Timeline & Time-Warp Controller */}
+      <TicketDetailModal />
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      {/* Geofence Map Modal */}
+      <MapViewModal visible={isMapOpen} onClose={() => setIsMapOpen(false)} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  appContainer: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: '#FAFAFA',
+    position: 'relative',
   },
-  safeArea: {
+  screenArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
   },
 });

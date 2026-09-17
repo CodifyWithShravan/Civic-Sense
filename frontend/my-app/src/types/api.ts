@@ -6,6 +6,17 @@ export type TicketStatus =
   | 'RESOLVED'
   | 'REJECTED';
 
+<<<<<<< HEAD
+=======
+export type HazardType =
+  | 'ELECTRICAL_HAZARD'
+  | 'POTHOLE'
+  | 'OPEN_MANHOLE'
+  | 'GARBAGE_OVERFLOW'
+  | 'STREETLIGHT_DEFECT'
+  | 'WATERLOGGING';
+
+>>>>>>> a9fd93c (Done with frontend)
 export interface AuditLogItem {
   id: number;
   fromStatus: TicketStatus | null;
@@ -16,6 +27,7 @@ export interface AuditLogItem {
   timestamp: string;
 }
 
+<<<<<<< HEAD
 export interface IngestRequest {
   latitude: number;
   longitude: number;
@@ -28,6 +40,12 @@ export interface IngestResponse {
   id: number;
   title: string;
   hazardType: string;
+=======
+export interface Ticket {
+  id: number;
+  title: string;
+  hazardType: HazardType | string;
+>>>>>>> a9fd93c (Done with frontend)
   status: TicketStatus;
   municipality: string;
   ward: string;
@@ -37,6 +55,16 @@ export interface IngestResponse {
   latitude: number;
   longitude: number;
   createdAt: string;
+<<<<<<< HEAD
+=======
+  description?: string;
+  citizenContact?: string;
+  // Dynamic swarm dispatch metadata
+  botDispatchId?: string;
+  etaMinutes?: number;
+  consensusScore?: number;
+  stage?: 1 | 2 | 3 | 4 | 5;
+>>>>>>> a9fd93c (Done with frontend)
 }
 
 export interface TimelineResponse {
@@ -48,6 +76,7 @@ export interface TimelineResponse {
   timeline: AuditLogItem[];
 }
 
+<<<<<<< HEAD
 export interface TicketSummary {
   id: number;
   title: string;
@@ -74,6 +103,9 @@ export interface TicketDetail extends TicketSummary {
 }
 
 export interface AdvanceResponse {
+=======
+export interface SimulationAdvanceResponse {
+>>>>>>> a9fd93c (Done with frontend)
   ticketId: number;
   previousStatus: TicketStatus;
   newStatus: TicketStatus;
@@ -83,9 +115,22 @@ export interface AdvanceResponse {
   newActions: AuditLogItem[];
 }
 
+<<<<<<< HEAD
 export interface ResolveResponse {
   ticketId: number;
   status: TicketStatus;
   message: string;
   resolvedAt: string;
+=======
+export interface CitizenNode {
+  name: string;
+  nodeId: string;
+  ward: string;
+  district: string;
+  consensusScore: number;
+  phoneOrEmail: string;
+  alertsEnabled: boolean;
+  consensusProtocolEnabled: boolean;
+  version: string;
+>>>>>>> a9fd93c (Done with frontend)
 }
