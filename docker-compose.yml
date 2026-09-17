@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # PostgreSQL 15 Database Service
+  # ============================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: civic-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: civicdb
+      POSTGRES_USER: civicuser
+      POSTGRES_PASSWORD: civicpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civicuser -d civicdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # CivicAdvocate Spring Boot 3 Backend Service
+  # ============================================================================
+  civic-backend:
+    build:
+      context: ./backend/civic-backend
+      dockerfile: Dockerfile
+    container_name: civic-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/civicdb
+      SPRING_DATASOURCE_USERNAME: civicuser
+      SPRING_DATASOURCE_PASSWORD: civicpassword
+      APP_UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  uploads_data:
